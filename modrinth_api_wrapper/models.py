@@ -1,6 +1,13 @@
 from pydantic import BaseModel
 from typing import List, Optional, Union
+from enum import Enum
 from datetime import datetime
+
+
+class VersionType(Enum):
+    RELEASE = "release"
+    BETA = "beta"
+    ALPHA = "alpha"
 
 
 class DonationUrl(BaseModel):
@@ -91,7 +98,7 @@ class Version(BaseModel):
     changelog: Optional[str] = None
     dependencies: Optional[List[Dependencies]] = None
     game_versions: Optional[List[str]] = None
-    version_type: Optional[str] = None
+    version_type: Optional[VersionType] = None
     loaders: Optional[List[str]] = None
     featured: Optional[bool] = None
     status: Optional[str] = None

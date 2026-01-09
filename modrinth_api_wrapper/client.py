@@ -76,9 +76,9 @@ class Client:
         )
         return SearchResult(**res)
 
-    def list_project_versions(self, project_id: str) -> List[Version]:
+    def list_project_versions(self, project_id: str, params: Optional[Dict]) -> List[Version]:
         url = f"{self.endpoint}/v2/project/{project_id}/version"
-        res = request(url, headers=self.headers)
+        res = request(url, headers=self.headers, params=params)
         return [Version(**item) for item in res]
 
     def get_version(self, version_id: str) -> Version:
