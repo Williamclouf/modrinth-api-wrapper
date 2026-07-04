@@ -1,0 +1,60 @@
+name: Build CLI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/**"
+      - "modrinth_api_wrapper/**"
+      - "pyproject.toml"
+      - ".github/workflows/build-cli.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            asset_name: modrinth-download-windows-x86_64.exe
+          - os: macos-latest
+            asset_name: modrinth-download-macos-arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install just
+        uses: taiki-e/install-action@just
+
+      - name: Build standalone binary
+        run: |
+          just build-cli
+
+      - name: Rename binary for release
+        run: |
+          python -c "from pathlib import Path; import shutil; src=Path('dist/native/modrinth-download.exe' if '${{ runner.os }}' == 'Windows' else 'dist/native/modrinth-download'); dst=Path('dist/native/${{ matrix.asset_name }}'); dst.parent.mkdir(parents=True, exist_ok=True); shutil.copyfile(src, dst)"
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: cli-${{ github.run_id }}-${{ runner.os }}
+          name: CLI build ${{ github.run_id }} (${{ runner.os }})
+          draft: true
+          prerelease: true
+          files: dist/native/${{ matrix.asset_name }}

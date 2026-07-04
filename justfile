@@ -9,6 +9,9 @@ test:
 build:
   uv build
 
+build-cli:
+  uv run --with pyinstaller python -m PyInstaller --onefile --name modrinth-download --distpath dist/native scripts/download_mod.py
+
 release:
   @echo 'Tagging v{{VERSION}}...'
   git tag "v{{VERSION}}"
